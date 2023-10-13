@@ -8,6 +8,7 @@ import { Article } from './article.entity';
 import { IArticleRO, IArticlesRO, ICommentsRO } from './article.interface';
 import { Comment } from './comment.entity';
 import { CreateArticleDto, CreateCommentDto } from './dto';
+import { Tag } from '../tag/tag.entity';
 
 @Injectable()
 export class ArticleService {
@@ -148,7 +149,7 @@ export class ArticleService {
     return { comments: article!.comments.getItems() };
   }
 
-  async create(userId: number, dto: CreateArticleDto) {
+  /*async create(userId: number, dto: CreateArticleDto) {
     const user = await this.userRepository.findOne(
       { id: userId },
       { populate: ['followers', 'favorites', 'articles'] },
@@ -159,7 +160,33 @@ export class ArticleService {
     await this.em.flush();
 
     return { article: article.toJSON(user!) };
-  }
+  }*/
+
+  async create(userId: number, dto: CreateArticleDto) {
+    const user = await this.userRepository.findOne(
+      { id: userId },
+      { populate: ['followers', 'favorites', 'articles'] },
+    );
+    
+    const article = new Article(user!, dto.title, dto.description, dto.body);
+    
+    // Handle tags
+    for (const tag of dto.tagList) {
+        let dbTag = await this.em.getRepository(Tag).findOne({ tag: tag });
+        if (!dbTag) {
+            dbTag = new Tag();
+            dbTag.tag = tag;
+            await this.em.persistAndFlush(dbTag);
+        }
+        //article.tags.add(dbTag); // Assuming the article entity has a tags collection // Assuming the article entity has a tags collection
+    }
+    
+    article.tagList.push(...dto.tagList);
+    user?.articles.add(article);
+    await this.em.flush();
+
+    return { article: article.toJSON(user!) };
+}
 
   async update(userId: number, slug: string, articleData: any): Promise<IArticleRO> {
     const user = await this.userRepository.findOne(
