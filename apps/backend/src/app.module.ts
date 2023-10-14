@@ -8,6 +8,7 @@ import { ProfileModule } from './profile/profile.module';
 import { TagModule } from './tag/tag.module';
 import { UserModule } from './user/user.module';
 import ormConfig from '../mikro-orm.config';
+
 @Module({
   controllers: [AppController],
   imports: [MikroOrmModule.forRoot(ormConfig), ArticleModule, UserModule, ProfileModule, TagModule],

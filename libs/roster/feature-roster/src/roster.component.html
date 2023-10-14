@@ -1,0 +1,36 @@
+<div class="home-page">
+  <div class="banner">
+    <div class="container">
+      <h1 class="logo-font">conduit</h1>
+      <p>A place to share your knowledge.</p>
+    </div>
+  </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Total Articles</th>
+                <th>Total Likes</th>
+                <th>First Article Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- <tr *ngFor="let user of rosterData"> -->
+            <tr *ngFor="let user of rosterData$ | async">
+                 <td><a [routerLink]="['/profile', user.username]">{{ user.username }}</a></td>
+                <td>{{ user.totalArticles }}</td>
+                <td>{{ user.totalLikes }}</td>
+                <td>{{ user.firstArticleDate | date:'mediumDate' }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<style>
+    th, td {
+        text-align: center;
+    }
+</style>

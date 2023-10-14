@@ -8,6 +8,7 @@ import { CreateUserDto, LoginUserDto, UpdateUserDto } from './dto';
 import { User } from './user.entity';
 import { IUserRO } from './user.interface';
 import { UserRepository } from './user.repository';
+import { Article } from '../article/article.entity';
 
 @Injectable()
 export class UserService {
@@ -86,6 +87,35 @@ export class UserService {
     const user = await this.userRepository.findOneOrFail({ email });
     return this.buildUserRO(user);
   }
+
+  async getRosterData(): Promise<any[]> {
+    const users = await this.userRepository.findAll();
+    // Using Promise.all to parallelize fetching articles for each user
+    const dataPromises = users.map(async user => {
+      const articles = await this.em.find(Article, { author: user });
+      const totalArticles = articles.length;
+      const totalLikes = articles.reduce((sum, article) => sum + article.favoritesCount, 0);
+      const firstArticleDate = totalArticles > 0 ? Math.min(...articles.map(a => a.createdAt.getTime())) : null;
+      return {
+        username: user.username,
+        totalArticles,
+        totalLikes,
+        firstArticleDate
+      };
+    });
+
+    const data = await Promise.all(dataPromises);
+
+    // Sort by the number of likes
+    const sortedData = data.sort((a, b) => b.totalLikes - a.totalLikes);
+
+    return sortedData;
+}
+
+  async getAllUsers() {
+    return this.userRepository.find({});
+  }
+  
 
   generateJWT(user: User) {
     const today = new Date();

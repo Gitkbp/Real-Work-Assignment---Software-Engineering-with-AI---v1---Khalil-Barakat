@@ -6,6 +6,7 @@ import { IUserRO } from './user.interface';
 import { UserService } from './user.service';
 
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { User as UserEntity } from './user.entity';
 
 @ApiBearerAuth()
 @ApiTags('user')
@@ -48,4 +49,15 @@ export class UserController {
     const user = { email, token, username, bio, image };
     return { user };
   }
+
+  @Get('roster')
+  async getRoster(): Promise<any[]> {
+  return this.userService.getRosterData();
+  }
+
+  @Get('users')
+  async getAllUsers(): Promise<UserEntity[]> {
+      return this.userService.getAllUsers();
+  }
+
 }
